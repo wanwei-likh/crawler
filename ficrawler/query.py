@@ -4,6 +4,11 @@ import argparse
 
 
 def query_csv(symbol=None, company=None, ex_date_start=None, ex_date_end=None):
+    symbol = symbol.lower() if symbol else None
+    company = company.lower() if company else None
+    ex_date_start = int(ex_date_start.replace("-", "")) if ex_date_start else None
+    ex_date_end = int(ex_date_end.replace("-", "")) if ex_date_end else None
+    
     with open('t.csv','r') as myFile:
         lines = csv.reader(myFile)
         result = []
@@ -24,8 +29,7 @@ def query_csv(symbol=None, company=None, ex_date_start=None, ex_date_end=None):
 
             result.append(line)
 
-        for item in result:
-            print(item)
+        return result
 
 def main():
     parser = argparse.ArgumentParser(description='Query csv')
@@ -35,11 +39,9 @@ def main():
     parser.add_argument('--ex_date_end', help='display an ex_date_end')
 
     args = parser.parse_args()
-    symbol = args.symbol.lower() if args.symbol else None
-    company = args.company.lower() if args.company else None
-    ex_date_start = int(args.ex_date_start.replace("-", "")) if args.ex_date_start else None
-    ex_date_end = int(args.ex_date_end.replace("-", "")) if args.ex_date_end else None
-    query_csv(symbol, company, ex_date_start, ex_date_end)
+    result = query_csv(args.symbol, args.company, args.ex_date_start, args.ex_date_end)
+    for item in result:
+        print(item)
 
 
 if __name__ == "__main__":
