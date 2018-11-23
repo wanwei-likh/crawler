@@ -6,6 +6,7 @@ import re
 import sys
 import traceback
 import csv
+import argparse
 
 try:
     from HTMLParser import HTMLParser
@@ -83,10 +84,9 @@ def parse_html(url):
     RESULT.extend(result)
     lock.release()
 
-
-if __name__ == "__main__":
+def start_crawl(concurrent=30):
     start_time = time.time()
-    sem = threading.Semaphore(30) #设置同时最多3个
+    sem = threading.Semaphore(concurrent) #设置同时最多3个
     start_date = datetime.date.today()
     end_date = start_date + datetime.timedelta(30)
     date = start_date
@@ -98,8 +98,10 @@ if __name__ == "__main__":
         thread_box.append(html_thread)
         html_thread.start()
         date += datetime.timedelta(1)
+
     for item in thread_box:
         item.join()
+
     end_time = time.time()
     print(end_time - start_time)
     print("total:", len(RESULT))
@@ -107,3 +109,12 @@ if __name__ == "__main__":
         myWriter = csv.writer(myFile)
         myWriter.writerow(("company", "website", "symbol", "dividend", "anouncement_date", "record_date", "ex_date", "pay_date"))
         myWriter.writerows(RESULT)
+
+def main():
+    parser = argparse.ArgumentParser(description='Crawl to csv')
+    parser.add_argument('-c', '--concurrent', type=int, default=30, help='concurrent num')
+    args = parser.parse_args()
+    start_crawl(args.concurrent)
+
+if __name__ == "__main__":
+    main()
